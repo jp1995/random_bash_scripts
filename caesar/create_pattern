@@ -1,0 +1,35 @@
+#!/bin/bash
+
+while getopts n:u option
+do
+	case "${option}"
+		in
+		n) KEY=${OPTARG};;
+		u) UPPERCASE=true;;
+	esac
+done
+
+ABET=(a b c d e f g h i j k l m n o p q r s t u v w x y z)
+
+if [ -z $KEY ]; then
+	echo 'Required option -n missing'
+	exit
+fi
+
+if [ $KEY -gt 25 ]; then
+	KEY=$(($KEY % 26));
+fi
+
+BEGIN=${ABET[$KEY]}
+END=${ABET[@]:0:$KEY}
+
+SECRET="[$BEGIN-za-${END[@]: -1}]"
+
+if [ -z $UPPERCASE ]; then
+	echo $SECRET
+else
+	echo $SECRET | tr '[a-z]' '[A-Z]'
+fi
+
+
+

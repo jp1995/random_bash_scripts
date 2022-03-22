@@ -1,0 +1,29 @@
+#!/bin/bash
+
+while getopts n:u option
+do
+	case "${option}"
+		in
+		n) KEY=${OPTARG};;
+		u) UPPERCASE=true;;
+	esac
+done
+
+if [ -z $KEY ]; then
+	echo 'Required option -n missing'
+	exit
+fi
+
+if [ -z $UPPERCASE ]; then
+	CIPHER=$(./create_pattern -n $KEY)
+else
+	CIPHER=$(./create_pattern -n $KEY -u)
+fi
+
+while read lines; do
+	if [[ $lines =~ [[:upper:]] ]]; then
+		echo $lines | tr '[A-Z]' "$CIPHER"
+	else
+		echo $lines | tr '[a-z]' "$CIPHER"
+	fi
+done

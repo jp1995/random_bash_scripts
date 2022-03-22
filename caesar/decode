@@ -1,0 +1,16 @@
+#!/bin/bash
+
+FILE=$1
+
+for i in {1..25}; do
+
+	echo "Shift $i"
+
+	while IFS=$'\n' read -r line; do
+	
+		SECRET="$(./create_pattern -n $i -u)"
+
+		echo $line | tr $SECRET '[A-Z]'
+	
+	done < $FILE
+done

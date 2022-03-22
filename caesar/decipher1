@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# Bash practice :)
+# Reading a file line by line, attempting to decipher for every shift of the Caesar cipher
+# Then matching these with an English dictionary to output only the solves with English in them
+
+FILE=$1
+declare -A SOLVES
+echo -e "Attempting to decipher file contents...\n"
+
+for i in {1..25}; do
+	while IFS=$'\n' read -r line; do
+	
+		SECRET="$(./create_pattern -n $i -u)"
+		SOLVE=$(echo $line | tr $SECRET '[A-Z]')
+		WORDS=();
+
+		# Redeclaring IFS to separate words	
+		IFS=$' '
+
+		for word in $SOLVE; do
+			if $(grep -Fixq $word /usr/share/dict/words) ; then
+				WORDS+=($word)
+			fi
+		done
+
+		# Declaring some variables so the if statement below is more clear
+		SOLVELEN=$(echo $SOLVE | wc -w)
+		SOLVEPERC=$(echo "$SOLVELEN*0.6" | bc)
+		WORDSLEN=${#WORDS[@]}
+		
+		# Checking if English words found constitute more than 60% of the sentence
+		if (( $(echo "$WORDSLEN > $SOLVEPERC" | bc -l) )); then
+
+			# Adding key+value to dictionary such that one key can have multiple values
+			# "${SOLVES[$i]}" - saves previous value(s), if any
+			# "${SOLVES[$i]:+\n}" - adds a newline if there's a previous value
+			# Finally, "$SOLVE" adds the new value
+
+			SOLVES[$i]="${SOLVES[$i]}${SOLVES[$i]:+\n}$SOLVE"
+
+		fi
+	
+	done < $FILE
+done
+
+if [[ ${!SOLVES[@]} ]]; then
+	echo "Found English in some shifts"
+
+	for i in "${!SOLVES[@]}"; do
+		echo "Shift $i"
+		echo -e "${SOLVES[$i]}"
+	done
+else
+	echo 'Found no English in shifts'
+fi
